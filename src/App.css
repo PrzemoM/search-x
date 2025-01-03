@@ -73,9 +73,15 @@
   margin: 0;
 }
 
-.result-container {
+.search-metadata {
+  text-align: left;
+  margin-left: 50px;
+}
+
+.result-entry {
   text-align: left;
   margin: 0 0 50px 50px;
+  width: fit-content;
 }
 
 .result-title {

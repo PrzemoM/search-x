@@ -6,3 +6,8 @@ export type TitleEntry = {
 export type FinalEntry = TitleEntry & {
     description: string;
 }
+
+export type SearchMetadata = {
+    searchTime: number;
+    resultsCount: number;
+}

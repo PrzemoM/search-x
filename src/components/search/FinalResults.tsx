@@ -2,17 +2,18 @@ import React from 'react';
 import { FinalEntry } from "./types"
 
 type FinalResultsProps = {
-    finalResults: FinalEntry[]
+    finalResults: FinalEntry[];
+    isLoadingFinalResults: boolean;
 }
 
 export const FinalResults = (finalResultsProps: FinalResultsProps) => {
-    const { finalResults } = finalResultsProps;
+    const { finalResults, isLoadingFinalResults } = finalResultsProps;
 
     return (
-        <>
-            {
+        <div>
+            {isLoadingFinalResults ? <p>loading search results...</p> :
                 finalResults.map(result =>
-                    <div className='result-container'>
+                    <div className='result-entry' key={result.id}>
                         <a href={`https://www.google.pl/search?q=${result.title}`}>
                             <h3 className='result-title'>{result.title}</h3>
                         </a>
@@ -20,6 +21,6 @@ export const FinalResults = (finalResultsProps: FinalResultsProps) => {
                     </div >
                 )
             }
-        </>
+        </div>
     )
 }
