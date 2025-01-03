@@ -1,8 +1,15 @@
-import React, { useState } from 'react';
-import { AutocompleteResultsProps } from './types';
+import React from 'react';
+import { TitleEntry } from './types';
 
-export const AutocompleteResults = (searchResultsProps: AutocompleteResultsProps) => {
-    const { preselectedIndex, setPreselectedIndex, onAutocompleteEntrySelected, autocompleteResults } = searchResultsProps;
+type AutocompleteResultsProps = {
+    onAutocompleteEntrySelected: () => void;
+    preselectedIndex: number;
+    setPreselectedIndex: (index: number) => void;
+    autocompleteResults: TitleEntry[];
+}
+
+export const AutocompleteResults = (autocompleteResultsProps: AutocompleteResultsProps) => {
+    const { preselectedIndex, setPreselectedIndex, onAutocompleteEntrySelected, autocompleteResults } = autocompleteResultsProps;
 
     const onEnter = (index: number) => {
         setPreselectedIndex(index)

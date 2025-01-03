@@ -2,10 +2,11 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { fakeData } from '../../data/data';
 import { AutocompleteResults } from './AutocompleteResults';
 import { FinalEntry, TitleEntry } from './types';
+import { FinalResults } from './FinalResults';
 
 export const Search = () => {
     const [inputValue, setInputValue] = useState("")
-    const [isResultsBoxVisible, setIsResultsBoxVisible] = useState(false)
+    const [canShowResultsBox, setCanShowResultsBox] = useState(false)
     const [preselectedIndex, setPreselectedIndex] = useState(-1)
 
     const [titleSearchResults, setTitleSearchResults] = useState<TitleEntry[]>([])
@@ -27,13 +28,13 @@ export const Search = () => {
 
     const handleSearchInputChange = (newValue: string) => {
         setInputValue(newValue)
-        if (!isResultsBoxVisible) {
-            setIsResultsBoxVisible(true);
+        if (!canShowResultsBox) {
+            setCanShowResultsBox(true);
         }
     }
 
     const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-        setIsResultsBoxVisible(false);
+        setCanShowResultsBox(false);
     }
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -53,13 +54,11 @@ export const Search = () => {
 
         if (key === "Enter" && preselectedIndex !== -1) {
             performSearchForFinalResults();
-            setIsResultsBoxVisible(false);
+            setCanShowResultsBox(false);
         }
     }
 
     const performSearchForFinalResults = () => {
-        console.log('performSearchForFinalResults triggered');
-
         const chosenSearchTitle = titleSearchResults[preselectedIndex];
         const finalSearchEntries = fakeData.find(data => data.id === chosenSearchTitle.id)?.entries;
         if (finalSearchEntries) {
@@ -74,13 +73,13 @@ export const Search = () => {
             <div className='search-container'>
                 <input
                     ref={inputRef}
-                    onFocus={() => setIsResultsBoxVisible(true)}
+                    onFocus={() => setCanShowResultsBox(true)}
                     onBlur={handleInputBlur}
                     className='search-input' value={inputValue}
                     onChange={e => handleSearchInputChange(e.target.value)}
                     placeholder='Enter your search here'
                 />
-                {isResultsBoxVisible && inputValue &&
+                {canShowResultsBox && inputValue && titleSearchResults &&
                     // {inputValue &&
                     <AutocompleteResults
                         onAutocompleteEntrySelected={performSearchForFinalResults}
@@ -90,9 +89,7 @@ export const Search = () => {
                     />
                 }
             </div>
-            {finalResults.map(result =>
-                <p>{`${result.id} ${result.title}`}</p>
-            )}
+            <FinalResults finalResults={finalResults} />
         </div>
     )
 }
