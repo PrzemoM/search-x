@@ -1,13 +1,11 @@
 import React from 'react';
 import './App.css';
-import { Search } from './components/search/Search.tsx';
+import { Search } from './components/search/Search';
 
 export const App = () => {
   return (
     <div className="App">
-      <header className="App-header">
         <Search />
-      </header>
     </div>
   );
 }
