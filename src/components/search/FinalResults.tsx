@@ -1,5 +1,5 @@
 import React from 'react';
-import { FinalEntry } from "./types"
+import { FinalEntry } from "./types";
 
 type FinalResultsProps = {
     finalResults: FinalEntry[];

@@ -61,21 +61,34 @@
 }
 
 .title-result-entry {
+  display: flex;
+  align-items: center;
   height: 40px;
   line-height: 40px;
+  text-align: left;
 }
 
 .title-result-entry-selected {
   background-color: lightgray;
 }
 
-.title-result-entry p {
+.entry-text {
+  display: inline-block;
   margin: 0;
+  margin-left: 5px;
+  cursor: pointer;
+  flex-grow: 1;
+}
+
+.history-entry-text {
+  font-weight: bold;
+  color: #c58af9
 }
 
 .search-metadata {
   text-align: left;
   margin-left: 50px;
+  color: gray;
 }
 
 .result-entry {
@@ -92,6 +105,14 @@
 
 .result-description {
   margin-top: 5px;
+}
+
+.remove-history-entry {
+  margin-right: 10px;
+  color: gray;
+  text-align: right;
+  cursor: pointer;
+  z-index: 1000;
 }
 
 @keyframes App-logo-spin {

@@ -15,6 +15,7 @@ export const Search = () => {
 
     const [titleSearchResults, setTitleSearchResults] = useState<TitleEntry[]>([])
     const [finalResults, setFinalResults] = useState<FinalEntry[]>([])
+    const [recentSearchHistory, setRecentSearchHistory] = useState<string[]>([])
     const [metadata, setMetadata] = useState<SearchMetadata | null>(null)
 
     const inputRef = useCallback((inputElement: HTMLInputElement) => {
@@ -73,6 +74,7 @@ export const Search = () => {
 
         const chosenSearchTitle = titleSearchResults[preselectedIndex];
         setInputValue(chosenSearchTitle.title);
+        setRecentSearchHistory(prevState => [...new Set(prevState).add(chosenSearchTitle.title)]);
 
         // again random timeout to simulate network response delay
         const delay = Math.random() * 2000;
@@ -102,13 +104,14 @@ export const Search = () => {
                     placeholder='Enter your search here'
                 />
                 {canShowResultsBox && inputValue && !!titleSearchResults.length &&
-                    // {inputValue &&
                     <AutocompleteResults
                         isLoadingAutocomplete={isLoadingAutocomplete}
                         onAutocompleteEntrySelected={performSearchForFinalResults}
                         preselectedIndex={preselectedIndex}
                         setPreselectedIndex={setPreselectedIndex}
                         autocompleteResults={titleSearchResults}
+                        recentSearchHistory={recentSearchHistory}
+                        removeFromRecentSearchHistory={(itemToRemove: string) => setRecentSearchHistory(prevState => prevState.filter(item => item !== itemToRemove))}
                     />
                 }
             </div>
