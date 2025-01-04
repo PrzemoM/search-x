@@ -1,16 +1,12 @@
 .App {
   text-align: center;
+
+  --common-lightgray: lightgray;
 }
 
 .App-logo {
   height: 40vmin;
   pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
 }
 
 .App-header {
@@ -45,8 +41,10 @@
 .search-input {
   width: 100%;
   height: 40px;
+  border: 2px solid var(--common-lightgray);
   border-radius: 20px;
   padding: 0 10px;
+  outline: none;
 }
 
 .autocomplete-results-box {
@@ -55,9 +53,9 @@
   margin: auto;
   margin-top: 3px;
   background-color: white;
-  border: 1px solid lightgray;
+  border: 1px solid var(--common-lightgray);
   border-radius: 20px;
-  box-shadow: 0 0 7px 3px lightgray;
+  box-shadow: 0 0 7px 3px var(--common-lightgray);
 }
 
 .title-result-entry {
@@ -69,7 +67,7 @@
 }
 
 .title-result-entry-selected {
-  background-color: lightgray;
+  background-color: var(--common-lightgray);
 }
 
 .entry-text {
@@ -113,14 +111,4 @@
   text-align: right;
   cursor: pointer;
   z-index: 1000;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
 }

@@ -1,13 +1,13 @@
-export type TitleEntry = {
+export type SearchHint = {
     id: string;
     title: string;
 }
 
-export type FinalEntry = TitleEntry & {
+export type SearchResult = SearchHint & {
     description: string;
 }
 
 export type SearchMetadata = {
-    searchTime: number;
     resultsCount: number;
+    searchTime: number;
 }

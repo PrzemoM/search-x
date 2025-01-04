@@ -1,21 +1,28 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { fakeData } from '../../data/data';
-import { AutocompleteResults } from './AutocompleteResults';
-import { FinalEntry, SearchMetadata, TitleEntry } from './types';
-import { FinalResults } from './FinalResults';
 import { Metadata } from './Metadata';
+import { SearchHints } from './SearchHints';
+import { SearchResults } from './SearchResults';
+import { SearchHint, SearchMetadata, SearchResult } from './types';
+
+type HintContextType = {
+    performSearchForResults: () => void;
+    removeFromHistory: (hint: string) => void;
+}
+
+export const HintContext = createContext<HintContextType>({ performSearchForResults: () => { }, removeFromHistory: () => { } });
 
 export const Search = () => {
     const [inputValue, setInputValue] = useState("")
-    const [canShowResultsBox, setCanShowResultsBox] = useState(false)
+    const [isInputFocused, setIsInputFocused] = useState(false)
     const [preselectedIndex, setPreselectedIndex] = useState(-1)
 
-    const [isLoadingAutocomplete, setIsLoadingAutocomplete] = useState(false)
-    const [isLoadingFinalResults, setIsLoadingFinalResults] = useState(false)
+    const [isLoadingHints, setIsLoadingHints] = useState(false)
+    const [isLoadingResults, setIsLoadingResults] = useState(false)
 
-    const [titleSearchResults, setTitleSearchResults] = useState<TitleEntry[]>([])
-    const [finalResults, setFinalResults] = useState<FinalEntry[]>([])
-    const [recentSearchHistory, setRecentSearchHistory] = useState<string[]>([])
+    const [hints, setHints] = useState<SearchHint[]>([])
+    const [results, setResults] = useState<SearchResult[]>([])
+    const [history, setHistory] = useState<string[]>([])
     const [metadata, setMetadata] = useState<SearchMetadata | null>(null)
 
     const inputRef = useCallback((inputElement: HTMLInputElement) => {
@@ -26,26 +33,20 @@ export const Search = () => {
 
     useEffect(() => {
         if (inputValue) {
-            setIsLoadingAutocomplete(true)
+            setIsLoadingHints(true)
 
             // random timeout to simulate network response delay
             setTimeout(() => {
-                const currentSearchResults = fakeData.filter(entry => entry.title.toLowerCase().startsWith(inputValue.toLowerCase()));
-                setTitleSearchResults(currentSearchResults.slice(0, 10).map(result => ({ id: result.id, title: result.title })))
-                setIsLoadingAutocomplete(false)
+                const results = fakeData.filter(entry => entry.title.toLowerCase().startsWith(inputValue.toLowerCase()));
+                setHints(results.slice(0, 10).map(result => ({ id: result.id, title: result.title })))
+                setIsLoadingHints(false)
             }, Math.random() * 1000);
         }
     }, [inputValue])
 
-    const handleSearchInputChange = (newValue: string) => {
-        setInputValue(newValue)
-        if (!canShowResultsBox) {
-            setCanShowResultsBox(true);
-        }
-    }
-
-    const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-        setCanShowResultsBox(false);
+    const handleSearchInputChange = (value: string) => {
+        setPreselectedIndex(-1);
+        setInputValue(value);
     }
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -54,42 +55,41 @@ export const Search = () => {
         }
 
         const key = e.key;
-
         if (key == "ArrowUp" && preselectedIndex > 0) {
             setPreselectedIndex(prevState => prevState - 1);
         }
-
-        if (key == "ArrowDown" && preselectedIndex < titleSearchResults.length - 1) {
+        if (key == "ArrowDown" && preselectedIndex < hints.length - 1) {
             setPreselectedIndex(prevState => prevState + 1);
         }
-
         if (key === "Enter" && preselectedIndex !== -1) {
-            performSearchForFinalResults();
-            setCanShowResultsBox(false);
+            performSearchForResults();
         }
     }
 
-    const performSearchForFinalResults = () => {
-        setIsLoadingFinalResults(true);
+    const performSearchForResults = () => {
+        setIsLoadingResults(true);
 
-        const chosenSearchTitle = titleSearchResults[preselectedIndex];
-        setInputValue(chosenSearchTitle.title);
-        setRecentSearchHistory(prevState => [...new Set(prevState).add(chosenSearchTitle.title)]);
+        const selectedHint = hints[preselectedIndex];
+        setInputValue(selectedHint.title);
+        setHistory(prevState => [...new Set(prevState).add(selectedHint.title)]);
 
         // again random timeout to simulate network response delay
         const delay = Math.random() * 2000;
         setTimeout(() => {
             // slicing found results to randomize the number of found results (just a 'hack', it's easier this way than generating fake randomized entries for each search title)
-            const finalSearchEntries = fakeData.find(data => data.id === chosenSearchTitle.id)?.entries.slice(0, Math.random() * 50);
-            if (finalSearchEntries) {
-                const shuffledEntries = finalSearchEntries?.sort((a, b) => 0.5 - Math.random());
-                setFinalResults(shuffledEntries)
+            const results = fakeData.find(data => data.id === selectedHint.id)?.entries.slice(0, Math.random() * 50);
+            if (results) {
+                const shuffledResults = results.sort((a, b) => 0.5 - Math.random());
+                setResults(shuffledResults)
             }
-            setIsLoadingFinalResults(false);
-            setMetadata({ searchTime: delay, resultsCount: finalSearchEntries?.length || 0 })
+            setIsLoadingResults(false);
+            setMetadata({ searchTime: delay, resultsCount: results?.length || 0 })
         }, delay);
 
     }
+
+    const showHints = isInputFocused && inputValue && !!hints.length;
+    const showMetadata = !isLoadingResults && metadata;
 
     return (
         <div onKeyDown={handleKeyDown}>
@@ -97,26 +97,30 @@ export const Search = () => {
             <div className='search-container'>
                 <input
                     ref={inputRef}
-                    onFocus={() => setCanShowResultsBox(true)}
-                    onBlur={handleInputBlur}
-                    className='search-input' value={inputValue}
+                    className='search-input'
+                    onBlur={() => setIsInputFocused(false)}
+                    onFocus={() => setIsInputFocused(true)}
+                    value={inputValue}
                     onChange={e => handleSearchInputChange(e.target.value)}
                     placeholder='Enter your search here'
                 />
-                {canShowResultsBox && inputValue && !!titleSearchResults.length &&
-                    <AutocompleteResults
-                        isLoadingAutocomplete={isLoadingAutocomplete}
-                        onAutocompleteEntrySelected={performSearchForFinalResults}
-                        preselectedIndex={preselectedIndex}
-                        setPreselectedIndex={setPreselectedIndex}
-                        autocompleteResults={titleSearchResults}
-                        recentSearchHistory={recentSearchHistory}
-                        removeFromRecentSearchHistory={(itemToRemove: string) => setRecentSearchHistory(prevState => prevState.filter(item => item !== itemToRemove))}
-                    />
+                {showHints &&
+                    <HintContext.Provider value={{
+                        performSearchForResults,
+                        removeFromHistory: (itemToRemove: string) => setHistory(prevState => prevState.filter(item => item !== itemToRemove))
+                    }}>
+                        <SearchHints
+                            isLoadingHints={isLoadingHints}
+                            preselectedIndex={preselectedIndex}
+                            setPreselectedIndex={setPreselectedIndex}
+                            hints={hints}
+                            history={history}
+                        />
+                    </HintContext.Provider>
                 }
             </div>
-            {!isLoadingFinalResults && metadata && <Metadata time={metadata?.searchTime} count={metadata?.resultsCount} />}
-            <FinalResults finalResults={finalResults} isLoadingFinalResults={isLoadingFinalResults} />
+            {showMetadata && <Metadata {...metadata} />}
+            <SearchResults searchResults={results} isLoadingResults={isLoadingResults} />
         </div>
     )
 }
